@@ -7,22 +7,118 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Load Libraries
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+# Predicting Iowa housing prices through various methods
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Exploratory Data Analysis(EDA), Dependent Variable
 
 ```{r cars}
-summary(cars)
+library(e1071)
+library(dplyr)
+library(ggplot2)
+library(caretEnsemble)
 ```
 
-## Including Plots
+```{r}
+Iowa_test <- read.csv('data/test.csv')
+Iowa_train <- read.csv('data/train.csv')
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+```{r}
+summary(Iowa_test)
+summary(Iowa_train)
+```
+
+```{r}
+str(Iowa_test)
+str(Iowa_train)
+```
+
+```{r}
+ ggplot(data = Iowa_train, aes(Iowa_train$SalePrice) ) + geom_histogram() +labs(title = "Distribution of Sale Price", x = "Sale Price", y = "count")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x ="", y=Iowa_train$SalePrice)) + geom_boxplot() + labs(title = "Distribution of sale price", y = "Sale Price")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(Iowa_train$SalePrice, fill = "grey50")) + geom_density() +labs(title = "Distribution of sale price", x = "Sale Price")
+```
+
+```{r}
+ ggplot(data = Iowa_train, aes(x = "", y=Iowa_train$SalePrice) ) + geom_violin() +labs(title = "Distribution of Sale Price", y = "Sale Price")
+```
+
+## Exploratory Data Analysis(EDA), Dependent Variable + Independent Variables
+
+```{r}
+ ggplot(data = Iowa_train, aes(Iowa_train$SalePrice) ) + geom_histogram() +facet_grid(~Iowa_train$MSZoning) +labs(title = "Sales Price by Zone", x = "Sale Price", y = "count")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$MSSubClass) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$OverallQual) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+
+```{r}
+Iowa_train$OverallCond <- as.factor(Iowa_train$OverallCond)
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$OverallCond) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$HouseStyle) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$TotRmsAbvGrd) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$KitchenQual) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$BedroomAbvGr) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$GrLivArea, y=Iowa_train$SalePrice)) + geom_point() +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$X1stFlrSF, y=Iowa_train$SalePrice)) + geom_point() +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$GarageCars) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(y=Iowa_train$SalePrice, x=Iowa_train$YearRemodAdd)) + geom_point()  +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(y=Iowa_train$SalePrice, x=Iowa_train$YearBuilt)) + geom_point()  +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+```{r}
+ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$Neighborhood) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+```
+
+
+# Model Building
+## Classic Linear Regression
+
+
+
+
+    
