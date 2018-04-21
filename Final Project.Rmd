@@ -18,6 +18,7 @@ library(e1071)
 library(dplyr)
 library(ggplot2)
 library(caretEnsemble)
+library(randomForest)
 ```
 
 ```{r}
@@ -70,7 +71,6 @@ ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet
 
 
 ```{r}
-Iowa_train$OverallCond <- as.factor(Iowa_train$OverallCond)
 ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~Iowa_train$OverallCond) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
 ```
 
@@ -116,7 +116,24 @@ ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet
 
 
 # Model Building
-## Classic Linear Regression
+
+## Classic Linear Regression Model
+
+
+
+```{r}
+Model_1 <- lm(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars  ,  data = Iowa_train)
+summary(Model_1)
+
+median(abs(Model_1$residuals))
+```
+
+##Random Forest Model
+```{r}
+Random_Forest_Model <- randomForest(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = Iowa_train, mtry = 7, importance = TRUE, na.action = na.omit)
+
+Random_Forest_Model
+```
 
 
 
