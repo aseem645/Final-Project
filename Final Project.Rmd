@@ -19,11 +19,28 @@ library(dplyr)
 library(ggplot2)
 library(caretEnsemble)
 library(randomForest)
+library(car)
+library(readr)
+
 ```
 
 ```{r}
 Iowa_test <- read.csv('data/test.csv')
 Iowa_train <- read.csv('data/train.csv')
+
+```
+
+```{r}
+Iowa_train <- Iowa_train[-c(1460), ]
+```
+
+```{r}
+Iowa_test$SalePrice <- NA
+Iowa_train[-c(1460), ]
+
+df.combined = rbind(Iowa_train, Iowa_test)
+
+Iowa_test$SalePrice <- as.integer(Iowa_test$SalePrice)
 
 ```
 
@@ -52,6 +69,229 @@ ggplot(data = Iowa_train, aes(Iowa_train$SalePrice, fill = "grey50")) + geom_den
 ```{r}
  ggplot(data = Iowa_train, aes(x = "", y=Iowa_train$SalePrice) ) + geom_violin() +labs(title = "Distribution of Sale Price", y = "Sale Price")
 ```
+
+# Data Cleaning
+```{r}
+NAcol <- which(colSums(is.na(df.combined))>0)
+sort(colSums(sapply(df.combined[NAcol], is.na)), decreasing = TRUE)
+```
+
+
+```{r}
+##Alley 
+levels <- levels(df.combined$Alley)
+levels[length(levels) + 1] <- "None"
+
+#df$Species <- factor(df$Species, levels = levels)
+df.combined$Alley[is.na(df.combined$Alley)] <- "None"
+
+##Fence
+
+levels <- levels(df.combined$Fence)
+levels[length(levels) + 1] <- "None"
+#df$Species <- factor(df$Species, levels = levels)
+df.combined$Fence[is.na(df.combined$Fence)] <- "None"
+
+##FireplaceQu
+
+levels <- levels(df.combined$FireplaceQu)
+levels[length(levels) + 1] <- "None"
+#df$Species <- factor(df$Species, levels = levels)
+df.combined$FireplaceQu[is.na(df.combined$FireplaceQu)] <- "None"
+
+
+##PoolQu
+levels <- levels(df.combined$PoolQC)
+levels[length(levels) + 1] <- "None"
+#df.combined$PoolQC <- factor(df.combined$PoolQC, levels = levels)
+df.combined$PoolQC[is.na(df.combined$PoolQC)] <- "None"
+
+##LotFrontage
+df.combined$LotFrontage[is.na(df.combined$LotFrontage)] <- 69.31
+
+##GarageArea
+df.combined$GarageArea[is.na(df.combined$GarageArea)] <- 472.9
+
+##GarageCars
+df.combined$GarageCars[is.na(df.combined$GarageCars)] <- 1.767
+
+##GarageYrBlt
+levels <- levels(df.combined$GarageYrBlt)
+levels[length(levels) + 1] <- 'No Date'
+#df.combined$GarageYrBlt <- factor(df.combined$GarageYrBlt, levels = levels)
+df.combined$GarageYrBlt[is.na(df.combined$GarageYrBlt)] <- 'No Date'
+
+##GarageFinish
+levels <- levels(df.combined$GarageFinish)
+levels[length(levels) + 1] <- 'Unf'
+#df.combined$GarageFinish <- factor(df.combined$GarageFinish, levels = levels)
+df.combined$GarageFinish[is.na(df.combined$GarageFinish)] <- 'Unf'
+
+##GarageQual
+levels <- levels(df.combined$GarageQual)
+levels[length(levels) + 1] <- "None"
+#df.combined$GarageQual <- factor(df.combined$GarageQual, levels = levels)
+df.combined$GarageQual[is.na(df.combined$GarageQual)] <- 'None'
+
+##MiscFeature
+levels <- levels(df.combined$MiscFeature)
+levels[length(levels) + 1] <- 'None'
+#df.combined$MiscFeature <- factor(df.combined$MiscFeature, levels = levels)
+df.combined$MiscFeature[is.na(df.combined$MiscFeature)] <- 'None'
+
+
+##GarageType
+levels <- levels(df.combined$GarageType)
+levels[length(levels) + 1] <- 'None'
+#df.combined$GarageType <- factor(df.combined$GarageType, levels = levels)
+df.combined$GarageType[is.na(df.combined$GarageType)] <- 'None'
+
+##GarageCond
+levels <- levels(df.combined$GarageCond)
+levels[length(levels) + 1] <- "None"
+#df.combined$GarageCond <- factor(df.combined$GarageCond, levels = levels)
+df.combined$GarageCond[is.na(df.combined$GarageCond)] <- 'None'
+
+##SaleType
+levels <- levels(df.combined$SaleType)
+levels[length(levels) + 1] <- "Other"
+#df.combined$SaleType <- factor(df.combined$SaleType, levels = levels)
+df.combined$SaleType[is.na(df.combined$SaleType)] <- 'Other'
+
+
+##KitchenQu
+levels <- levels(df.combined$KitchenQual)
+levels[length(levels) + 1] <- "None"
+#df.combined$KitchenQual <- factor(df.combined$KitchenQual, levels = levels)
+df.combined$KitchenQual[is.na(df.combined$KitchenQual)] <- 'None'
+
+
+##Electrical
+levels <- levels(df.combined$Electrical)
+levels[length(levels) + 1] <- "None"
+#df.combined$Electrical <- factor(df.combined$Electrical, levels = levels)
+df.combined$Electrical[is.na(df.combined$Electrical)] <- 'None'
+
+##TotalBsmtSf
+levels <- levels(df.combined$TotalBsmtSF)
+levels[length(levels) + 1] <- "None"
+#df.combined$TotalBsmtSF <- factor(df.combined$TotalBsmtSF, levels = levels)
+df.combined$TotalBsmtSF[is.na(df.combined$TotalBsmtSF)] <- 'None'
+
+
+##BsmtUnfSf
+levels <- levels(df.combined$BsmtUnfSF)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtUnfSF <- factor(df.combined$BsmtUnfSF, levels = levels)
+df.combined$BsmtUnfSF[is.na(df.combined$BsmtUnfSF)] <- 'None'
+
+##BsmtFinSF1
+levels <- levels(df.combined$BsmtFinSF1)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtFinSF1 <- factor(df.combined$BsmtFinSF1, levels = levels)
+df.combined$BsmtFinSF1[is.na(df.combined$BsmtFinSF1)] <- 'None'
+
+##BsmtFinSF2
+levels <- levels(df.combined$BsmtFinSF2)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtFinSF2 <- factor(df.combined$BsmtFinSF2, levels = levels)
+df.combined$BsmtFinSF2[is.na(df.combined$BsmtFinSF2)] <- 'None'
+
+##Exterior1st
+levels <- levels(df.combined$Exterior1st)
+levels[length(levels) + 1] <- "None"
+#df.combined$Exterior1st <- factor(df.combined$Exterior1st, levels = levels)
+df.combined$Exterior1st[is.na(df.combined$Exterior1st)] <- 'None'
+
+##Exterior2nd
+levels <- levels(df.combined$Exterior2nd)
+levels[length(levels) + 1] <- "None"
+#df.combined$Exterior2nd <- factor(df.combined$Exterior2nd, levels = levels)
+df.combined$Exterior2nd[is.na(df.combined$Exterior2nd)] <- 'None'
+
+
+##Functional
+levels <- levels(df.combined$Functional)
+levels[length(levels) + 1] <- "None"
+#df.combined$Functional <- factor(df.combined$Functional, levels = levels)
+df.combined$Functional[is.na(df.combined$Functional)] <- 'None'
+
+##BsmtFullBath
+levels <- levels(df.combined$BsmtFullBath)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtFullBath <- factor(df.combined$BsmtFullBath, levels = levels)
+df.combined$BsmtFullBath[is.na(df.combined$BsmtFullBath)] <- 'None'
+
+
+##BsmtHalfBath
+levels <- levels(df.combined$BsmtHalfBath)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtHalfBath <- factor(df.combined$BsmtHalfBath, levels = levels)
+df.combined$BsmtHalfBath[is.na(df.combined$BsmtHalfBath)] <- 'None'
+
+##Utilities
+levels <- levels(df.combined$Utilities)
+levels[length(levels) + 1] <- "None"
+#df.combined$Utilities <- factor(df.combined$Utilities, levels = levels)
+df.combined$Utilities[is.na(df.combined$Utilities)] <- 'None'
+
+##MSZoning
+levels <- levels(df.combined$MSZoning)
+levels[length(levels) + 1] <- "None"
+#df.combined$MSZoning <- factor(df.combined$BsmtHalfBath, levels = levels)
+df.combined$MSZoning[is.na(df.combined$MSZoning)] <- 'None'
+
+
+##MasVnrArea
+levels <- levels(df.combined$MasVnrArea)
+levels[length(levels) + 1] <- "None"
+#df.combined$MasVnrArea <- factor(df.combined$MasVnrArea, levels = levels)
+df.combined$MasVnrArea[is.na(df.combined$MasVnrArea)] <- 'None'
+
+
+##MasVnrType
+levels <- levels(df.combined$MasVnrType)
+levels[length(levels) + 1] <- "None"
+#df.combined$MasVnrType <- factor(df.combined$MasVnrType, levels = levels)
+df.combined$MasVnrType[is.na(df.combined$MasVnrType)] <- 'None'
+
+
+##BsmtFinType1
+levels <- levels(df.combined$BsmtFinType1)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtFinType1 <- factor(df.combined$BsmtFinType1, levels = levels)
+df.combined$BsmtFinType1[is.na(df.combined$BsmtFinType1)] <- 'None'
+
+##BsmtFinType2
+levels <- levels(df.combined$BsmtFinType2)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtFinType2 <- factor(df.combined$BsmtFinType2, levels = levels)
+df.combined$BsmtFinType2[is.na(df.combined$BsmtFinType2)] <- 'None'
+
+##BsmtQual
+levels <- levels(df.combined$BsmtQual)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtQual <- factor(df.combined$BsmtQual, levels = levels)
+df.combined$BsmtQual[is.na(df.combined$BsmtQual)] <- 'None'
+
+##BsmtExposure
+levels <- levels(df.combined$BsmtExposure)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtExposure <- factor(df.combined$BsmtExposure, levels = levels)
+df.combined$BsmtExposure[is.na(df.combined$BsmtExposure)] <- 'None'
+
+##BsmtCond
+levels <- levels(df.combined$BsmtCond)
+levels[length(levels) + 1] <- "None"
+#df.combined$BsmtCond <- factor(df.combined$BsmtCond, levels = levels)
+df.combined$BsmtCond[is.na(df.combined$BsmtCond)] <- 'None'
+
+##SalePrice
+df.combined$SalePrice[is.na(df.combined$SalePrice)] <- 0
+
+
+```
+
 
 ## Exploratory Data Analysis(EDA), Dependent Variable + Independent Variables
 
@@ -122,17 +362,30 @@ ggplot(data = Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet
 
 
 ```{r}
-Model_1 <- lm(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars  ,  data = Iowa_train)
+Model_1 <- lm(log(SalePrice) ~ YearBuilt + log(GrLivArea) + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars  ,  data = Iowa_train)
 summary(Model_1)
 
 median(abs(Model_1$residuals))
 ```
 
+```{r}
+predict_linear <- predict(Model_1, Iowa_test, type = "response")
+predict_linear <- exp(predict_linear)
+submit_linear <- data.frame(Id = Iowa_test$Id, SalePrice = predict_linear)
+write.csv(submit_linear, file = "Linearmodel.csv", row.names = FALSE)
+```
+
 ##Random Forest Model
 ```{r}
-Random_Forest_Model <- randomForest(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = Iowa_train, mtry = 7, importance = TRUE, na.action = na.omit)
+Random_Forest_Model <- randomForest(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = Iowa_train, mtry = 7, ntree = 1000, importance = TRUE, na.action = na.omit)
 
 Random_Forest_Model
+```
+
+```{r}
+
+predict(Random_Forest_Model, newdata = df.combined)
+
 ```
 
 
