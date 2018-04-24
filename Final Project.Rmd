@@ -23,7 +23,8 @@ library(car)
 library(readr)
 library(forcats)
 library(magrittr)
-
+library(xgboost)
+library(Matrix)
 
 ```
 
@@ -185,10 +186,13 @@ df.combined$BsmtFinSF1 <- as.numeric(df.combined$BsmtFinSF1)
 df.combined$BsmtFinSF2 <- as.numeric(df.combined$BsmtFinSF2)
 
 df.combined$TotalBsmtSF <- as.numeric(df.combined$TotalBsmtSF)
+
+df.combined$BsmtUnfSF <- as.numeric(df.combined$BsmtUnfSF)
 ```
 
-
-
+```{r}
+df.combined$SalePrice = log(df.combined$SalePrice)
+```
 
 
 
@@ -205,77 +209,101 @@ new_Iowa_test <- df.combined[1461:2919,]
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$MSSubClass) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$MSSubClass) +labs(title = "Comparing sale price by type of dwelling", x = "Sale Price", y= "Count")
 ```
 
 
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$OverallQual) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$OverallQual) +labs(title = "Comparing sale price by overall quality", x = "Sale Price", y= "Count")
 ```
 
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$OverallCond) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$OverallCond) +labs(title = "Comparing sale price by Overall Condition", x = "Sale Price", y= "Count")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$HouseStyle) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$HouseStyle) +labs(title = "Comparing sale price by house style", x = "House Style", y= "Count")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$TotRmsAbvGrd) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$TotRmsAbvGrd) +labs(title = "Comparing sale price by total rooms above ground", x = "Sale Price", y= "Count")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$KitchenQual) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$KitchenQual) +labs(title = "Comparing sale price by Kitchen Quality", x = "Sale Price", y= "Count")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$BedroomAbvGr) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$BedroomAbvGr) +labs(title = "Comparing sale price by number of bedrooms above ground", x = "Sale Price", y= "Count")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$GrLivArea, y=new_Iowa_train$SalePrice)) + geom_point() +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$GrLivArea, y=new_Iowa_train$SalePrice)) + geom_point() +labs(title = "Comparing Sale Price by Ground Living Area", x = "Ground Living Area", y= "Sale Price")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$X1stFlrSF, y=new_Iowa_train$SalePrice)) + geom_point() +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$X1stFlrSF, y=new_Iowa_train$SalePrice)) + geom_point() +labs(title = "Comparing sale price by first floor square footage", x = "1st floor square footage", y= "Sale Price")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$GarageCars) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$GarageCars) +labs(title = "Comparing sale price by Garage Car Space", x = "Sale Price", y= "Count")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(y=new_Iowa_train$SalePrice, x=new_Iowa_train$YearRemodAdd)) + geom_point()  +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(y=new_Iowa_train$SalePrice, x=new_Iowa_train$YearRemodAdd)) + geom_point()  +labs(title = "Comparing sale price by year remodeled", x = "Year remodeled", y= "Sale Price")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(y=new_Iowa_train$SalePrice, x=new_Iowa_train$YearBuilt)) + geom_point()  +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(y=new_Iowa_train$SalePrice, x=new_Iowa_train$YearBuilt)) + geom_point()  +labs(title = "Comparing sale price by year built", x = "Sale Price", y= "Year Built")
 ```
 
 ```{r}
-ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$Neighborhood) +labs(title = "Comparing sale price by type of dwelling", x = "Child poverty %", y= "Number of counties")
+ggplot(data = new_Iowa_train, aes(x=new_Iowa_train$SalePrice)) + geom_histogram() +facet_wrap(~new_Iowa_train$Neighborhood) +labs(title = "Comparing sale price by neighborhood", x = "Sale Price", y= "Count")
+```
+
+```{r}
+ggplot(data = new_Iowa_train, aes(y=new_Iowa_train$SalePrice, x=new_Iowa_train$OverallQual)) + geom_point()  +labs(title = "Comparing sale price by Overall Quality", x = "Overall Quality", y= "Sale Price")
 ```
 
 
 # Model Building
 
-## Classic Linear Regression Model
-
-
+## Initial Model
+```{r}
+Initial_Forest = randomForest(SalePrice ~ . , data=new_Iowa_train, na.action=na.omit, importance=TRUE, mtry= 26, ntree = 1000)
+```
 
 ```{r}
-Model_1 <- lm(log(SalePrice) ~ YearBuilt + log(GrLivArea)  + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars  ,  data = new_Iowa_train)
+varImpPlot(Initial_Forest, type = 2, n.var = 20)
+```
+
+```{r}
+predict_Initial <- predict(Initial_Forest, new_Iowa_test, type = "response", xlev = c("None"))
+submit_Initial <- data.frame(Id = new_Iowa_test$Id, SalePrice = predict_Initial)
+write.csv(submit_Initial, file = "Inital_model.csv", row.names = FALSE)
+```
+
+```{r}
+##Kaggle Score for this model: 2506th place, score of 0.14817
+```
+
+##Classic Linear Regression Model
+
+```{r}
+Model_1 <- lm(SalePrice ~ YearBuilt + log(GrLivArea)  + Neighborhood + GarageCars + OverallQual + TotalBsmtSF + YearRemodAdd +LotArea,  data = new_Iowa_train)
 
 
 median(abs(Model_1$residuals))
+
+summary(Model_1)
 ```
 
 ```{r}
 summary(new_Iowa_test)
 ```
+
 
 ```{r}
 predict_linear <- predict(Model_1, new_Iowa_test, type = "response", xlev = c("None"))
@@ -285,7 +313,7 @@ write.csv(submit_linear, file = "Linearmodel.csv", row.names = FALSE)
 ```
 
 ```{r}
-##Kaggle placement for this model: 2563rd place, score of 0.15087
+##Kaggle placement for this model: 2593rd place, score of 0.15512
 ```
 
 
@@ -306,7 +334,6 @@ Random_Forest_Model
 ```{r}
 
 predict_random_forest <- predict(Random_Forest_Model, new_Iowa_test, type = "response", xlev = c("None"))
-predict_random_forest <- exp(predict_random_forest)
 submit_random_forest <- data.frame(Id = new_Iowa_test$Id, SalePrice = predict_random_forest)
 write.csv(submit_random_forest, file = "random_forest.csv", row.names = FALSE)
 
@@ -320,6 +347,8 @@ write.csv(submit_random_forest, file = "random_forest.csv", row.names = FALSE)
 
 ```{r}
 house.bag <- randomForest(log(SalePrice)~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + TotRmsAbvGrd + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea +   Foundation + OpenPorchSF + YrSold, data = new_Iowa_train, mtry=20, importance=TRUE, na.action = na.omit)
+
+house.bag
 ```
 
 ```{r}
@@ -333,7 +362,20 @@ write.csv(submit_random_forest, file = "bag.csv", row.names = FALSE)
 ##Kaggle placement for this model: 2563rd place, score of 0.14973 score of 0.14973
 ```
 
+##XGBoost
+```{r}
+numerical_matrix <- sparse.model.matrix(SalePrice ~ .-1, data = new_Iowa_train)
+```
 
+
+```{r}
+require(xgboost)
+data(new_Iowa_train, package = "xgboost")
+data(new_Iowa_test, package = "xgboost")
+dtrain <- xgb.DMatrix(new_Iowa_train, label = new_Iowa_train$SalePrice)
+dtest <- xgb.DMatrix(new_Iowa_test, label = new_Iowa_test$SalePrice)
+
+```
 
 
     
