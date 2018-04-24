@@ -326,7 +326,7 @@ write.csv(submit_linear, file = "Linearmodel.csv", row.names = FALSE)
 
 
 
-Random_Forest_Model <- randomForest(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond  + TotRmsAbvGrd +   TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = new_Iowa_train, mtry = 7, ntree = 1000, importance = TRUE)
+Random_Forest_Model <- randomForest(SalePrice ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond  + TotRmsAbvGrd +   TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = new_Iowa_train, mtry = 7, ntree = 1000, importance = TRUE)
 
 Random_Forest_Model
 ```
