@@ -25,6 +25,8 @@ library(forcats)
 library(magrittr)
 library(xgboost)
 library(Matrix)
+library(gbm)
+library(glmnet)
 
 ```
 
@@ -281,6 +283,7 @@ varImpPlot(Initial_Forest, type = 2, n.var = 20)
 
 ```{r}
 predict_Initial <- predict(Initial_Forest, new_Iowa_test, type = "response", xlev = c("None"))
+predict_Initial <- exp(predict_Initial)
 submit_Initial <- data.frame(Id = new_Iowa_test$Id, SalePrice = predict_Initial)
 write.csv(submit_Initial, file = "Inital_model.csv", row.names = FALSE)
 ```
@@ -295,14 +298,11 @@ write.csv(submit_Initial, file = "Inital_model.csv", row.names = FALSE)
 Model_1 <- lm(SalePrice ~ YearBuilt + log(GrLivArea)  + Neighborhood + GarageCars + OverallQual + TotalBsmtSF + YearRemodAdd +LotArea,  data = new_Iowa_train)
 
 
-median(abs(Model_1$residuals))
-
 summary(Model_1)
+
+
 ```
 
-```{r}
-summary(new_Iowa_test)
-```
 
 
 ```{r}
@@ -328,14 +328,17 @@ write.csv(submit_linear, file = "Linearmodel.csv", row.names = FALSE)
 
 Random_Forest_Model <- randomForest(SalePrice ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond  + TotRmsAbvGrd +   TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = new_Iowa_train, mtry = 7, ntree = 1000, importance = TRUE)
 
-Random_Forest_Model
+summary(Random_Forest_Model)
+
 ```
 
 ```{r}
 
 predict_random_forest <- predict(Random_Forest_Model, new_Iowa_test, type = "response", xlev = c("None"))
+predict_random_forest <- exp(predict_random_forest)
 submit_random_forest <- data.frame(Id = new_Iowa_test$Id, SalePrice = predict_random_forest)
 write.csv(submit_random_forest, file = "random_forest.csv", row.names = FALSE)
+
 
 ```
 
@@ -348,7 +351,7 @@ write.csv(submit_random_forest, file = "random_forest.csv", row.names = FALSE)
 ```{r}
 house.bag <- randomForest(log(SalePrice)~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + TotRmsAbvGrd + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea +   Foundation + OpenPorchSF + YrSold, data = new_Iowa_train, mtry=20, importance=TRUE, na.action = na.omit)
 
-house.bag
+summary(house.bag)
 ```
 
 ```{r}
@@ -362,20 +365,42 @@ write.csv(submit_random_forest, file = "bag.csv", row.names = FALSE)
 ##Kaggle placement for this model: 2563rd place, score of 0.14973 score of 0.14973
 ```
 
-##XGBoost
-```{r}
-numerical_matrix <- sparse.model.matrix(SalePrice ~ .-1, data = new_Iowa_train)
-```
 
-
-```{r}
-require(xgboost)
-data(new_Iowa_train, package = "xgboost")
-data(new_Iowa_test, package = "xgboost")
-dtrain <- xgb.DMatrix(new_Iowa_train, label = new_Iowa_train$SalePrice)
-dtest <- xgb.DMatrix(new_Iowa_test, label = new_Iowa_test$SalePrice)
-
-```
-
-
+##GBM
     
+    ```{r}
+Iowa.boost=gbm(SalePrice ~ . ,data = new_Iowa_train,distribution = "gaussian",n.trees = 1000,
+                  shrinkage = 0.01, interaction.depth = 4)
+Iowa.boost
+
+summary(Iowa.boost)
+```
+
+```{r}
+predict_GBM <- predict(Iowa.boost, new_Iowa_test, type = "response", xlev = c("None"), n.trees=1000)
+predict_GBM <- exp(predict_GBM)
+submit_GBM <- data.frame(Id = new_Iowa_test$Id, SalePrice = predict_GBM)
+write.csv(submit_GBM, file = "GBM.csv", row.names = FALSE)
+```
+
+```{r}
+##Kaggle placement for this model: 1296th place, score of 0.12626
+```
+
+##Lasso
+
+```{r}
+x1 <- new_Iowa_train[,1:80]
+X2 <- matrix(x1, byrow = TRUE, nrow = 1460, ncol = 2)
+y1 <- new_Iowa_train[,81]
+```
+
+```{r}
+Lasso_model <- glmnet(x = X2, y = y1, alpha = 1)
+```
+
+```{r}
+length(X2)
+length(y1)
+```
+
