@@ -171,6 +171,22 @@ df.combined$BsmtUnfSF <- fct_explicit_na(df.combined$BsmtUnfSF, na_level = "None
 
 ```
 
+```{r}
+df.combined$GarageYrBlt <- as.integer(df.combined$GarageYrBlt)
+
+df.combined$MasVnrArea <- as.numeric(df.combined$MasVnrArea)
+
+df.combined$BsmtFullBath <- as.integer(df.combined$BsmtFullBath)
+
+df.combined$BsmtHalfBath <- as.numeric(df.combined$BsmtHalfBath)
+
+df.combined$BsmtFinSF1 <- as.numeric(df.combined$BsmtFinSF1)
+
+df.combined$BsmtFinSF2 <- as.numeric(df.combined$BsmtFinSF2)
+
+df.combined$TotalBsmtSF <- as.numeric(df.combined$TotalBsmtSF)
+```
+
 
 
 
@@ -269,50 +285,20 @@ write.csv(submit_linear, file = "Linearmodel.csv", row.names = FALSE)
 ```
 
 ```{r}
-##Kaggle placement for this model: 2579th place, score of 0.15087
+##Kaggle placement for this model: 2563rd place, score of 0.15087
 ```
 
 
 
 ##Random Forest Model
 
-```{r}
-new_Iowa_train$GarageYrBlt <- as.integer(new_Iowa_train$GarageYrBlt)
 
-new_Iowa_train$MasVnrArea <- as.integer(new_Iowa_train$MasVnrArea)
-
-new_Iowa_train$BsmtFullBath <- as.integer(new_Iowa_train$BsmtFullBath)
-
-new_Iowa_train$BsmtHalfBath <- as.integer(new_Iowa_train$BsmtHalfBath)
-
-new_Iowa_train$BsmtFinSF1 <- as.integer(new_Iowa_train$BsmtFinSF1)
-
-new_Iowa_train$BsmtFinSF2 <- as.integer(new_Iowa_train$BsmtFinSF2)
-
-new_Iowa_train$TotalBsmtSF <- as.integer(new_Iowa_train$TotalBsmtSF)
-```
-
-```{r}
-new_Iowa_test$GarageYrBlt <- as.integer(new_Iowa_test$GarageYrBlt)
-
-new_Iowa_test$MasVnrArea <- as.integer(new_Iowa_test$MasVnrArea)
-
-new_Iowa_test$BsmtFullBath <- as.integer(new_Iowa_test$BsmtFullBath)
-
-new_Iowa_test$BsmtHalfBath <- as.integer(new_Iowa_test$BsmtHalfBath)
-
-new_Iowa_test$BsmtFinSF1 <- as.integer(new_Iowa_test$BsmtFinSF1)
-
-new_Iowa_test$BsmtFinSF2 <- as.integer(new_Iowa_test$BsmtFinSF2)
-
-new_Iowa_test$TotalBsmtSF <- as.integer(new_Iowa_test$TotalBsmtSF)
-```
 
 ```{r}
 
 
 
-Random_Forest_Model <- randomForest(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + OverallQual*OverallCond +TotRmsAbvGrd + TotRmsAbvGrd*GarageCars + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = new_Iowa_train, mtry = 7, ntree = 1000, importance = TRUE)
+Random_Forest_Model <- randomForest(log(SalePrice) ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond  + TotRmsAbvGrd +   TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold,   data = new_Iowa_train, mtry = 7, ntree = 1000, importance = TRUE)
 
 Random_Forest_Model
 ```
@@ -327,7 +313,24 @@ write.csv(submit_random_forest, file = "random_forest.csv", row.names = FALSE)
 ```
 
 ```{r}
-##Kaggle placement for this model: 2545th place, score of 0.14973 score of 0.14973
+##Kaggle placement for this model: 2563rd place, score of 0.14973 score of 0.14973
+```
+
+##Bagging
+
+```{r}
+house.bag <- randomForest(log(SalePrice)~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond + TotRmsAbvGrd + TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea +   Foundation + OpenPorchSF + YrSold, data = new_Iowa_train, mtry=20, importance=TRUE, na.action = na.omit)
+```
+
+```{r}
+predict_bag <- predict(house.bag, new_Iowa_test, type = "response", xlev = c("None"))
+predict_bag <- exp(predict_bag)
+submit_bag <- data.frame(Id = new_Iowa_test$Id, SalePrice = predict_bag)
+write.csv(submit_random_forest, file = "bag.csv", row.names = FALSE)
+```
+
+```{r}
+##Kaggle placement for this model: 2563rd place, score of 0.14973 score of 0.14973
 ```
 
 
