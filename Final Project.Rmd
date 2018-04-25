@@ -7,7 +7,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Load Libraries
+# Aseem Sachdeva, Matthew O'Neil, Haris Saljic
 
 # Predicting Iowa housing prices through various methods
 
@@ -50,8 +50,8 @@ Iowa_test$SalePrice <- as.integer(Iowa_test$SalePrice)
 
 
 ```{r}
-summary(Iowa_test)
 summary(Iowa_train)
+summary(Iowa_test)
 ```
 
 ```{r}
@@ -205,6 +205,10 @@ new_Iowa_test <- df.combined[1461:2919,]
 
 
 ## Exploratory Data Analysis(EDA), Dependent Variable + Independent Variables
+
+```{r}
+ ggplot(data = new_Iowa_train, aes(new_Iowa_train$SalePrice) ) + geom_histogram() +labs(title = "Distribution of Sale Price", x = "Sale Price", y = "count")
+```
 
 ```{r}
  ggplot(data = new_Iowa_train, aes(new_Iowa_train$SalePrice) ) + geom_histogram() +facet_grid(~new_Iowa_train$MSZoning) +labs(title = "Sales Price by Zone", x = "Sale Price", y = "count")
@@ -366,7 +370,7 @@ write.csv(submit_random_forest, file = "bag.csv", row.names = FALSE)
 ```
 
 
-##GBM
+##Gradient Boosting
     
     ```{r}
 Iowa.boost=gbm(SalePrice ~ . ,data = new_Iowa_train,distribution = "gaussian",n.trees = 1000,
@@ -387,3 +391,12 @@ write.csv(submit_GBM, file = "GBM.csv", row.names = FALSE)
 ##Kaggle placement for this model: 1296th place, score of 0.12626
 ```
 
+#Sources
+
+##Erik Bruin - "House Prices: Lasso, XGBoost, and a detailed EDA" https://www.kaggle.com/erikbruin/house-prices-lasso-xgboost-and-a-detailed-eda
+
+##R-bloggers - "Gradient boosting in R"
+https://www.r-bloggers.com/gradient-boosting-in-r/
+
+##Stack Overflow - "Convert NA into a factor level"
+https://stackoverflow.com/questions/27195956/convert-na-into-a-factor-level
