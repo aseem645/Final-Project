@@ -388,19 +388,78 @@ write.csv(submit_GBM, file = "GBM.csv", row.names = FALSE)
 ```
 
 ##Lasso
+```{r}
+set.seed(123)
+cv_lasso = cv.glmnet(as.matrix(Training[, -59]), Training[, 59])
+
+## Predictions
+preds <- predict(cv_lasso, newx = as.matrix(new -59]), s = "lambda.min")
+rmse(Validation$SalePrice, preds)78
+```
+
 
 ```{r}
-x1 <- new_Iowa_train[,1:80]
-X2 <- matrix(x1, byrow = TRUE, nrow = 1460, ncol = 2)
-y1 <- new_Iowa_train[,81]
+#SalePrice ~ YearBuilt + LotArea + MSZoning + Neighborhood + GarageCars + OverallQual + OverallCond  + TotRmsAbvGrd +   TotalBsmtSF + Fireplaces + SaleType + HouseStyle + WoodDeckSF + GarageArea + BedroomAbvGr + FullBath + GrLivArea + Foundation + OpenPorchSF + YrSold
+```
+
+
+
+```{r}
+#X2 <- data.matrix(new_Iowa_train[1:1459,1:80], rownames.force = NA)
+#1 <- new_Iowa_train[,81]
 ```
 
 ```{r}
-Lasso_model <- glmnet(x = X2, y = y1, alpha = 1)
+#Lasso_model <- glmnet(x = X2, y = y1, alpha = 1)
+
+
 ```
 
 ```{r}
-length(X2)
-length(y1)
+#Lasso_Data_frame <- Lasso_model
+```
+
+```{r}
+
+```
+
+```{r}
+
+#lasso.pred <- predict(Lasso_model, newx, s = 0.01)
+#lasso.pred <- exp(lasso.pred)
+#submit_Lasso <- data.frame(Id = new_Iowa_test$Id, SalePrice = lasso.pred)
+#write.csv(lasso.pred, file = "Lasso.csv", row.names = FALSE)
+```
+
+```{r}
+X.train <- model.matrix(SalePrice ~ ., data = new_Iowa_train)
+y.train <- new_Iowa_train$SalePrice
+
+X.test <- model.matrix(SalePrice ~., data = new_Iowa_test)
+y.test <- new_Iowa_test$SalePrice
+```
+
+```{r}
+grid <- 10^seq(10, -2, length = 100)
+credit.ridge <- glmnet(X.train, y.train, alpha = 0, lambda = grid)
+```
+
+```{r}
+Iowa.lasso <- glmnet(X.train, y.train, lambda = grid, alpha = 1)
+```
+
+```{r}
+set.seed(55)
+cv.out.lasso <- cv.glmnet(X.train, y.train, lambda = grid, alpha = 1)
+```
+
+```{r}
+bestlam.lasso <- cv.out.lasso$lambda.min
+bestlam.lasso
+```
+
+```{r}
+Iowa.lasso.pred.bestlam <- predict(Iowa.lasso, s = bestlam.lasso, newx = X.test)
+summary(Iowa.lasso.pred.bestlam)
 ```
 
